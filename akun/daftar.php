@@ -9,15 +9,22 @@ if (!empty($_SESSION['id_user'])) {
 $pesan = '';
 $nama = '';
 $alamat = '';
+$telepon = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validasi data profil, password, dan kecocokan konfirmasi password.
     cek_token();
     $nama = is_string($_POST['nama'] ?? null) ? trim($_POST['nama']) : '';
     $alamat = is_string($_POST['alamat'] ?? null) ? trim($_POST['alamat']) : '';
+    $telepon = is_string($_POST['telepon'] ?? null) ? trim($_POST['telepon']) : '';
     $password = is_string($_POST['password'] ?? null) ? $_POST['password'] : '';
     $konfirmasi = is_string($_POST['konfirmasi'] ?? null) ? $_POST['konfirmasi'] : '';
-    if ($nama === '' || strlen($nama) > 100 || strlen($alamat) > 255) {
-        $pesan = 'Nama wajib diisi (maksimal 100 karakter), alamat maksimal 255 karakter.';
+    if (
+        $nama === '' ||
+        strlen($nama) > 100 ||
+        strlen($alamat) > 255 ||
+        strlen($telepon) > 30
+    ) {
+        $pesan = 'Nama wajib diisi (maksimal 100 karakter), alamat maksimal 255 karakter, dan telepon maksimal 30 karakter.';
     } elseif ($password === '' || strlen($password) > 72) {
         $pesan = 'Password wajib diisi, maksimal 72 byte.';
     } elseif ($password !== $konfirmasi) {
@@ -55,9 +62,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $id_user = mysqli_insert_id($conn);
                 $stmt = mysqli_prepare(
                     $conn,
-                    'INSERT INTO anggota(nomor_anggota,nama,alamat,id_user) VALUES (?,?,?,?)',
+                    'INSERT INTO anggota(nomor_anggota,nama,alamat,telepon,id_user) VALUES (?,?,?,?,?)',
                 );
-                mysqli_stmt_bind_param($stmt, 'sssi', $username, $nama, $alamat, $id_user);
+                mysqli_stmt_bind_param(
+                    $stmt,
+                    'ssssi',
+                    $username,
+                    $nama,
+                    $alamat,
+                    $telepon,
+                    $id_user,
+                );
                 mysqli_stmt_execute($stmt);
                 mysqli_commit($conn);
                 $_SESSION['pendaftaran_username'] = $username;
@@ -97,6 +112,11 @@ buka_halaman('Daftar Akun Anggota', true);
         <textarea name="alamat" maxlength="255" autocomplete="street-address"><?php echo aman(
             $alamat,
         ); ?></textarea>
+    </label><br><br>
+    <label>Nomor Telepon (opsional):<br>
+        <input type="tel" name="telepon" maxlength="30" autocomplete="tel" value="<?php echo aman(
+            $telepon,
+        ); ?>">
     </label><br><br>
     <label>Password:<br>
         <input type="password" name="password" maxlength="72" autocomplete="new-password" required>
