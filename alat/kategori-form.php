@@ -15,12 +15,9 @@ if ($id) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Periksa token dan pastikan nama kategori termasuk pilihan yang tersedia.
+    // Periksa token dan validasi nama kategori yang dimasukkan admin.
     cek_token();
     $nama = teks('nama_kategori', 25);
-    if (!in_array($nama, ['alat', 'elektronik'], true)) {
-        gagal('Pilih kategori Alat atau Elektronik.');
-    }
 
     // Kunci daftar kategori agar pemeriksaan duplikat dan penyimpanan aman.
     mysqli_begin_transaction($conn);
@@ -59,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
-// Gunakan judul dan pilihan awal yang sesuai mode formulir.
+// Gunakan judul dan nilai awal yang sesuai mode formulir.
 $judul = $id ? 'Edit Kategori' : 'Tambah Kategori';
 buka_halaman($judul);
 ?>
@@ -67,23 +64,9 @@ buka_halaman($judul);
 <form method="post">
     <?php token(); ?>
     <label>Nama Kategori<br>
-        <select name="nama_kategori" required>
-            <option value="" disabled <?php echo $id
-                ? ''
-                : 'selected'; ?>>-- Pilih Kategori --</option>
-            <?php foreach (
-                ['alat' => 'Alat', 'elektronik' => 'Elektronik']
-                as $nilai => $label
-            ) { ?>
-                <option value="<?php echo aman($nilai); ?>" <?php echo ($kategori_lama[
-    'nama_kategori'
-] ??
-    '') ===
-$nilai
-    ? 'selected'
-    : ''; ?>><?php echo aman($label); ?></option>
-            <?php } ?>
-        </select>
+        <input type="text" name="nama_kategori" maxlength="25" value="<?php echo aman(
+            $kategori_lama['nama_kategori'] ?? '',
+        ); ?>" placeholder="Contoh: Alat" required>
     </label><br><br>
     <button type="submit">Simpan</button> <a href="kategori-tampil.php">Kembali</a>
 </form>
