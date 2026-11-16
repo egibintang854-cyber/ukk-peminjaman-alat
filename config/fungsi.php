@@ -29,8 +29,14 @@ function aman($nilai)
 // Hitung denda Rp1.000 untuk setiap hari terlambat.
 function hitung_denda_php($batas, $kembali)
 {
-    $hari_terlambat = floor((strtotime($kembali) - strtotime($batas)) / 86400);
-    return max(0, $hari_terlambat) * 1000;
+    global $conn;
+    $stmt = mysqli_prepare($conn, 'SELECT hitung_denda(?, ?) AS denda');
+    mysqli_stmt_bind_param($stmt, 'ss', $batas, $kembali);
+    mysqli_stmt_execute($stmt);
+    $hasil = mysqli_stmt_get_result($stmt);
+    $denda = (int) (mysqli_fetch_assoc($hasil)['denda'] ?? 0);
+    mysqli_stmt_close($stmt);
+    return $denda;
 }
 
 // Hentikan proses. Perubahan dalam transaksi yang belum selesai dibatalkan.

@@ -11,6 +11,15 @@ $data = mysqli_fetch_assoc($hasil);
 if (!$data || $data['arsip']) {
     gagal('Data tidak ditemukan atau merupakan arsip lama.');
 }
+$id_pinjam_form = (int) $data['id_peminjam'];
+$hasil_pinjam_form = mysqli_query(
+    $conn,
+    "SELECT tanggal_pinjam FROM peminjam WHERE id_peminjam=$id_pinjam_form",
+);
+$pinjam = mysqli_fetch_assoc($hasil_pinjam_form);
+if (!$pinjam) {
+    gagal('Data peminjaman tidak ditemukan.');
+}
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Validasi tanggal dan kondisi, lalu hitung ulang denda sebelum menyimpan.
     cek_token();
